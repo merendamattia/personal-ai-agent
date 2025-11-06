@@ -114,10 +114,6 @@ async def handle_button_press(
     if user_input == "📝 Genera Recensione":
         message = (
             "📎 Per favore, inviami il link del prodotto Amazon\n\n"
-            "Accetto qualsiasi formato Amazon:\n"
-            "• Link completi (https://www.amazon.com/...)\n"
-            "• Link corti (amazon.com/dp/XXXXX)\n"
-            "• Link diretti da share\n\n"
             "⏳ La generazione della recensione potrebbe richiedere un minuto o due...\n\n"
             "Usa il pulsante ❌ Stop per annullare in qualsiasi momento."
         )
