@@ -1,8 +1,9 @@
 import logging
 import os
+from datetime import timedelta
 
 from dotenv import load_dotenv
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
+from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -24,10 +25,23 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Conversation states
-SELECTING_ACTION, WAITING_FOR_LINK = range(2)
+WAITING_FOR_LINK, GENERATING_REVIEW = range(2)
 
 # Global agent instance
 agent = None
+
+# Conversation timeout: 1 hour
+CONVERSATION_TIMEOUT = timedelta(hours=1)
+
+
+# Main keyboard layout
+def get_main_keyboard():
+    """Get the main keyboard with persistent buttons"""
+    return ReplyKeyboardMarkup(
+        [["📝 Genera Recensione", "ℹ️ Aiuto"], ["❌ Stop"]],
+        resize_keyboard=True,
+        one_time_keyboard=False,
+    )
 
 
 def _initialize_agent():
@@ -56,51 +70,70 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     welcome_message = (
         f"👋 Ciao {user.first_name}!\n\n"
-        "Sono il tuo **Amazon Reviewer AI Agent Bot**.\n\n"
-        "Posso aiutarti a generare recensioni dettagliate per prodotti Amazon.\n\n"
-        "Cosa vuoi fare?"
+        "🤖 Sono il tuo Amazon Reviewer AI Agent Bot.\n\n"
+        "✨ Posso aiutarti a generare recensioni dettagliate per prodotti Amazon in pochi click!\n\n"
+        "📱 Usa i pulsanti qui sotto per iniziare:"
     )
 
-    keyboard = [["📝 Genera Recensione", "❌ Esci"]]
-    reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
-
-    await update.message.reply_text(welcome_message, reply_markup=reply_markup)
-    return SELECTING_ACTION
+    await update.message.reply_text(welcome_message, reply_markup=get_main_keyboard())
+    return WAITING_FOR_LINK
 
 
-async def handle_menu_selection(
+async def handle_button_press(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
-    """Handle menu selection"""
-    user_input = update.message.text
+    """Handle main menu button presses"""
+    user_input = update.message.text.strip()
 
     if user_input == "📝 Genera Recensione":
         message = (
-            "📎 Per favore, inviami il link del prodotto Amazon.\n\n"
-            "Esempio: `https://www.amazon.com/your-product-link`\n\n"
-            "⏳ La generazione della recensione potrebbe richiedere qualche minuto..."
+            "📎 Per favore, inviami il link del prodotto Amazon\n\n"
+            "Esempi validi:\n"
+            "• `https://www.amazon.com/product-name/dp/XXXXX`\n"
+            "• `https://amazon.com/dp/XXXXX`\n\n"
+            "⏳ La generazione della recensione potrebbe richiedere un minuto o due...\n\n"
+            "Usa il pulsante ❌ Stop per annullare in qualsiasi momento."
         )
-        await update.message.reply_text(
-            message,
-            reply_markup=ReplyKeyboardRemove(),
-        )
+        await update.message.reply_text(message, reply_markup=get_main_keyboard())
         return WAITING_FOR_LINK
 
-    elif user_input == "❌ Esci":
-        await update.message.reply_text(
-            "👋 Arrivederci! Usa /start per ricominciare.",
-            reply_markup=ReplyKeyboardRemove(),
+    elif user_input == "ℹ️ Aiuto":
+        help_text = (
+            "ℹ️ Guida Rapida\n\n"
+            "Come usare il bot:\n"
+            "1️⃣ Premi 📝 Genera Recensione\n"
+            "2️⃣ Incolla il link del prodotto Amazon\n"
+            "3️⃣ Aspetta la generazione (1-2 minuti)\n"
+            "4️⃣ Ricevi la tua recensione!\n\n"
+            "Comandi disponibili:\n"
+            "• /start - Menu principale\n"
+            "• /help - Questa guida\n\n"
+            "Supporto:\n"
+            "Se il link non funziona, assicurati che:\n"
+            "• Sia un URL valido di Amazon\n"
+            "• Inizi con `https://`\n\n"
         )
-        return ConversationHandler.END
+        await update.message.reply_text(help_text, reply_markup=get_main_keyboard())
+        return WAITING_FOR_LINK
+
+    elif user_input == "❌ Stop":
+        goodbye_text = (
+            "👋 Arrivederci!\n\n" "Usa /start quando vuoi generare una nuova recensione."
+        )
+        await update.message.reply_text(goodbye_text, reply_markup=get_main_keyboard())
+        return WAITING_FOR_LINK
 
     else:
+        # User sent something that's not a button - check if it's an Amazon link
+        if user_input.startswith(("http://", "https://")):
+            return await handle_amazon_link(update, context)
+
+        # Invalid input
         await update.message.reply_text(
-            "❌ Opzione non riconosciuta. Usa i pulsanti sottostanti.",
-            reply_markup=ReplyKeyboardMarkup(
-                [["📝 Genera Recensione", "❌ Esci"]], one_time_keyboard=True
-            ),
+            "❌ Non ho capito. Usa i pulsanti per continuare.",
+            reply_markup=get_main_keyboard(),
         )
-        return SELECTING_ACTION
+        return WAITING_FOR_LINK
 
 
 async def handle_amazon_link(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -110,96 +143,121 @@ async def handle_amazon_link(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # Validate the link
     if not link.startswith(("http://", "https://")):
         await update.message.reply_text(
-            "❌ Il link non è valido. Assicurati che inizi con `http://` o `https://`"
+            "❌ Link non valido\n\n" "Assicurati che inizi con `http://` o `https://`",
+            reply_markup=get_main_keyboard(),
         )
         return WAITING_FOR_LINK
 
     if "amazon" not in link.lower():
         await update.message.reply_text(
-            "❌ Il link non sembra essere un link Amazon. Per favore, inviami un link valido."
+            "❌ Non sembra un link Amazon\n\n"
+            "Per favore, inviami un link da amazon.com",
+            reply_markup=get_main_keyboard(),
         )
         return WAITING_FOR_LINK
 
     logger.info(f"User {update.effective_user.id} requested review for: {link}")
 
     # Show loading message
-    loading_message = await update.message.reply_text(
+    await update.message.reply_text(
         "⏳ Sto generando la tua recensione...\n\n"
-        "Questo potrebbe richiedere un minuto o due. Per favore, aspetta..."
+        "Questo potrebbe richiedere un minuto o due. Per favore, aspetta.\n\n"
+        "🔄 Analizzando il prodotto...",
+        reply_markup=get_main_keyboard(),
     )
 
     try:
         # Generate review using the agent
         if agent is None:
-            await loading_message.edit_text(
-                "❌ Errore: L'agente non è stato inizializzato. Riprova con /start"
+            await update.message.reply_text(
+                "❌ Errore: L'agente non è stato inizializzato.\n\n"
+                "Usa /start per ricominciare.",
+                reply_markup=get_main_keyboard(),
             )
-            return SELECTING_ACTION
+            return WAITING_FOR_LINK
 
         review = agent.generate_review(link)
 
         # Check if review is too long for a single message (max 4096 chars)
         if len(review) > 4000:
             # Split the review into multiple messages
-            await loading_message.delete()
             messages = [review[i : i + 4000] for i in range(0, len(review), 4000)]
+
             for idx, msg in enumerate(messages):
-                await update.message.reply_text(msg)
+                if idx == 0:
+                    header = "📝 RECENSIONE GENERATA (parte 1)\n\n"
+                    await update.message.reply_text(
+                        header + msg, reply_markup=get_main_keyboard()
+                    )
+                else:
+                    part_num = idx + 1
+                    await update.message.reply_text(
+                        f"Parte {part_num}\n\n{msg}", reply_markup=get_main_keyboard()
+                    )
+
             # Add final message with link
             await update.message.reply_text(
-                f"✅ Recensione completata!\n\nLink prodotto: {link}"
+                f"✅ Recensione completata!\n\n"
+                f"🔗 Link prodotto:\n{link}\n\n"
+                f"📝 Vuoi generare un'altra recensione?",
+                reply_markup=get_main_keyboard(),
             )
         else:
-            await loading_message.edit_text(review)
+            await update.message.reply_text(
+                f"📝 RECENSIONE GENERATA\n\n{review}\n\n" f"🔗 Link prodotto:\n`{link}`",
+                reply_markup=get_main_keyboard(),
+            )
+
+            # Ask for another review
+            await update.message.reply_text(
+                "📝 Vuoi generare un'altra recensione?", reply_markup=get_main_keyboard()
+            )
 
         logger.info(
             f"Review generated successfully for user {update.effective_user.id}"
         )
 
-        # Show menu to generate another review
-        keyboard = [["📝 Genera Altra Recensione", "❌ Esci"]]
-        reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
-        await update.message.reply_text(
-            "🎉 Vuoi generare un'altra recensione?", reply_markup=reply_markup
-        )
-        return SELECTING_ACTION
-
     except Exception as e:
         logger.error(f"Error generating review: {e}")
-        await loading_message.edit_text(
-            f"❌ Errore durante la generazione della recensione:\n\n`{str(e)}`\n\n"
-            "Per favore, riprova con /start"
+        await update.message.reply_text(
+            f"❌ Errore durante la generazione\n\n"
+            f"`{str(e)}`\n\n"
+            f"Per favore, riprova con un link diverso.",
+            reply_markup=get_main_keyboard(),
         )
-        return SELECTING_ACTION
+
+    return WAITING_FOR_LINK
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send help message"""
     help_text = (
-        "🤖 **Amazon Reviewer AI Agent Bot**\n\n"
-        "**Comandi disponibili:**\n"
-        "• /start - Avvia il bot\n"
-        "• /help - Mostra questo messaggio\n\n"
-        "**Come usare:**\n"
-        "1️⃣ Fai clic su 'Genera Recensione'\n"
-        "2️⃣ Invia il link del prodotto Amazon\n"
-        "3️⃣ Aspetta che l'IA generi la recensione\n"
-        "4️⃣ Ricevi la tua recensione dettagliata!\n\n"
-        "⚙️ **Tecnologie utilizzate:**\n"
-        "• OpenAI GPT-4\n"
-        "• DataPizza AI Framework\n"
-        "• Python Telegram Bot"
+        "ℹ️ Amazon Reviewer AI Agent Bot\n\n"
+        "Come usare:\n"
+        "1️⃣ Premi il pulsante 📝 Genera Recensione\n"
+        "2️⃣ Incolla il link del prodotto Amazon\n"
+        "3️⃣ Aspetta la generazione (1-2 minuti)\n"
+        "4️⃣ Ricevi la tua recensione!\n\n"
+        "Comandi disponibili:\n"
+        "• /start - Menu principale\n"
+        "• /help - Questa guida\n\n"
+        "Note tecniche:\n"
+        "• Alimentato da OpenAI GPT-4\n"
+        "• Usa DataPizza AI Framework\n"
+        "• Python Telegram Bot\n\n"
+        "Supporto:\n"
+        "Se hai problemi, assicurati che il link sia valido e da amazon.com"
     )
-    await update.message.reply_text(help_text)
+    await update.message.reply_text(help_text, reply_markup=get_main_keyboard())
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Cancel the conversation"""
     await update.message.reply_text(
-        "❌ Operazione annullata. Usa /start per ricominciare.",
-        reply_markup=ReplyKeyboardRemove(),
+        "👋 Operazione annullata\n\n" "Usa i pulsanti per continuare!",
+        reply_markup=get_main_keyboard(),
     )
-    return ConversationHandler.END
+    return WAITING_FOR_LINK
 
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -230,16 +288,24 @@ def main() -> None:
 
     # Add conversation handler
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("start", start)],
+        entry_points=[
+            CommandHandler("start", start),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, handle_button_press),
+        ],
         states={
-            SELECTING_ACTION: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_menu_selection)
-            ],
             WAITING_FOR_LINK: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_amazon_link)
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_button_press),
+            ],
+            GENERATING_REVIEW: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_button_press),
             ],
         },
-        fallbacks=[CommandHandler("start", start), CommandHandler("cancel", cancel)],
+        fallbacks=[
+            CommandHandler("start", start),
+            CommandHandler("help", help_command),
+            CommandHandler("cancel", cancel),
+        ],
+        conversation_timeout=CONVERSATION_TIMEOUT,
     )
 
     application.add_handler(conv_handler)
