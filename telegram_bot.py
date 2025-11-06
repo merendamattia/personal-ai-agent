@@ -2,6 +2,7 @@ import logging
 import os
 from datetime import timedelta
 
+import requests
 from dotenv import load_dotenv
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import (
@@ -63,6 +64,28 @@ def _initialize_agent():
         return False
 
 
+def expand_short_url(short_url: str) -> str:
+    """
+    Expand shortened Amazon URLs (amzn.to, amzn.eu, a.co, etc.)
+    Follows HTTP redirects to get the final full URL
+    """
+    try:
+        # Use requests.get() with allow_redirects to follow all redirects
+        response = requests.get(short_url, allow_redirects=True, timeout=5)
+
+        # Log all redirect history
+        for resp in response.history:
+            logger.info(f"Redirect: {resp.status_code} -> {resp.url}")
+
+        # Get the final URL
+        final_url = response.url
+        logger.info(f"Expanded short URL: {short_url} -> {final_url}")
+        return final_url
+    except Exception as e:
+        logger.warning(f"Could not expand URL {short_url}: {e}. Using original.")
+        return short_url
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Start the conversation and show main menu"""
     user = update.effective_user
@@ -85,12 +108,16 @@ async def handle_button_press(
     """Handle main menu button presses"""
     user_input = update.message.text.strip()
 
+    # Remove extra spaces within the text as well
+    user_input = " ".join(user_input.split())
+
     if user_input == "📝 Genera Recensione":
         message = (
             "📎 Per favore, inviami il link del prodotto Amazon\n\n"
-            "Esempi validi:\n"
-            "• `https://www.amazon.com/product-name/dp/XXXXX`\n"
-            "• `https://amazon.com/dp/XXXXX`\n\n"
+            "Accetto qualsiasi formato Amazon:\n"
+            "• Link completi (https://www.amazon.com/...)\n"
+            "• Link corti (amazon.com/dp/XXXXX)\n"
+            "• Link diretti da share\n\n"
             "⏳ La generazione della recensione potrebbe richiedere un minuto o due...\n\n"
             "Usa il pulsante ❌ Stop per annullare in qualsiasi momento."
         )
@@ -140,6 +167,9 @@ async def handle_amazon_link(update: Update, context: ContextTypes.DEFAULT_TYPE)
     """Handle Amazon product link and generate review"""
     link = update.message.text.strip()
 
+    # Remove extra spaces within the link as well
+    link = " ".join(link.split())
+
     # Validate the link
     if not link.startswith(("http://", "https://")):
         await update.message.reply_text(
@@ -148,7 +178,9 @@ async def handle_amazon_link(update: Update, context: ContextTypes.DEFAULT_TYPE)
         )
         return WAITING_FOR_LINK
 
-    if "amazon" not in link.lower():
+    # Check if it's an Amazon link (accept various formats)
+    amazon_identifiers = ["amazon", "amzn", "a.co", "dp/", "ASIN"]
+    if not any(identifier in link.lower() for identifier in amazon_identifiers):
         await update.message.reply_text(
             "❌ Non sembra un link Amazon\n\n"
             "Per favore, inviami un link da amazon.com",
@@ -167,6 +199,10 @@ async def handle_amazon_link(update: Update, context: ContextTypes.DEFAULT_TYPE)
     )
 
     try:
+        # Expand short URLs (amzn.to, amzn.eu, a.co, etc.) to full Amazon URLs
+        final_link = expand_short_url(link)
+        logger.info(f"Using expanded link: {final_link}")
+
         # Generate review using the agent
         if agent is None:
             await update.message.reply_text(
@@ -176,7 +212,7 @@ async def handle_amazon_link(update: Update, context: ContextTypes.DEFAULT_TYPE)
             )
             return WAITING_FOR_LINK
 
-        review = agent.generate_review(link)
+        review = agent.generate_review(final_link)
 
         # Check if review is too long for a single message (max 4096 chars)
         if len(review) > 4000:
