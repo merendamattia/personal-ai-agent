@@ -37,7 +37,7 @@ An intelligent AI agent that generates detailed and professional Amazon product 
 2. **Create and activate a Python virtual environment:**
    ```bash
    conda create --name amazon-ai-agent-env python=3.11.13
-   conda activate amazon-reviewer-env
+   conda activate amazon-ai-agent-env
    ```
 
    Or using venv:

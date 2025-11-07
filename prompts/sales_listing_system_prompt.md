@@ -13,7 +13,7 @@ STILE IMPORTANTE:
 - Scrivi come se fosse una persona reale che rivende il prodotto
 - NON deve sembrare un annuncio commerciale professionale
 - Usa un linguaggio naturale e colloquiale
-- Scordi le formule pubblicitarie tipiche
+- Non usare le formule pubblicitarie tipiche
 - Scrivi come se stessi descrivendo il prodotto a un amico
 
 REGOLE DI RISPOSTA:
