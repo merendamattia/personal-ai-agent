@@ -6,11 +6,11 @@ class AmazonReviewerAgent(BaseAmazonAgent):
 
     def get_system_prompt_filename(self):
         """Return the filename of the system prompt"""
-        return "system_prompt.md"
+        return "review_system_prompt.md"
 
     def get_run_prompt_filename(self):
         """Return the filename of the run prompt template"""
-        return "run_prompt.md"
+        return "review_run_prompt.md"
 
     def get_agent_name(self):
         """Return the name of the agent"""
