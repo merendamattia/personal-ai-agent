@@ -1,3 +1,16 @@
+# [1.3.0](https://github.com/merendamattia/amazon-ai-agent/compare/v1.2.1...v1.3.0) (2025-11-07)
+
+
+### Bug Fixes
+
+* address code review feedback ([6e49b57](https://github.com/merendamattia/amazon-ai-agent/commit/6e49b574d9919975a3c0b53b03a622af850c1f63))
+* correct typos in environment activation command and sales listing prompts ([b6a89b1](https://github.com/merendamattia/amazon-ai-agent/commit/b6a89b18243fe7a9eac1d37116c0cf3e9f2aaf85))
+
+
+### Features
+
+* add sales listing generation feature ([e23baa6](https://github.com/merendamattia/amazon-ai-agent/commit/e23baa61ea8ce3157d7711695361e07a3252fb99))
+
 ## [1.2.1](https://github.com/merendamattia/amazon-reviewer-ai-agent/compare/v1.2.0...v1.2.1) (2025-11-06)
 
 
