@@ -5,10 +5,10 @@ from abc import ABC, abstractmethod
 from datapizza.agents import Agent
 from dotenv import load_dotenv
 
+from tools.web_fetch import create_web_fetch_tool
+from utils.client_utils import get_client
 from utils.prompt_loader import load_prompt
 from utils.url_utils import expand_short_url
-from utils.client_utils import get_client
-from tools.web_fetch import create_web_fetch_tool
 
 # Load environment variables
 load_dotenv()

@@ -1,7 +1,7 @@
 import logging
 
-from datapizza.clients.openai import OpenAIClient
 from datapizza.clients.google import GoogleClient
+from datapizza.clients.openai import OpenAIClient
 
 logger = logging.getLogger(__name__)
 
