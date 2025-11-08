@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/merendamattia/amazon-ai-agent/compare/v1.3.0...v1.3.1) (2025-11-08)
+
+
+### Performance Improvements
+
+* add character limit to title in sales listing prompts ([979430a](https://github.com/merendamattia/amazon-ai-agent/commit/979430ac9426509d5980202075388e5aad27fc8b))
+
 # [1.3.0](https://github.com/merendamattia/amazon-ai-agent/compare/v1.2.1...v1.3.0) (2025-11-07)
 
 
