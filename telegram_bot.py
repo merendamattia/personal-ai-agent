@@ -1,7 +1,6 @@
 import logging
 import os
 
-import requests
 from dotenv import load_dotenv
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import (
@@ -64,28 +63,6 @@ def _initialize_agent():
     except Exception as e:
         logger.error(f"Failed to initialize agents: {e}")
         return False
-
-
-def expand_short_url(short_url: str) -> str:
-    """
-    Expand shortened Amazon URLs (amzn.to, amzn.eu, a.co, etc.)
-    Follows HTTP redirects to get the final full URL
-    """
-    try:
-        # Use requests.get() with allow_redirects to follow all redirects
-        response = requests.get(short_url, allow_redirects=True, timeout=5)
-
-        # Log all redirect history
-        for resp in response.history:
-            logger.info(f"Redirect: {resp.status_code} -> {resp.url}")
-
-        # Get the final URL
-        final_url = response.url
-        logger.info(f"Expanded short URL: {short_url} -> {final_url}")
-        return final_url
-    except Exception as e:
-        logger.warning(f"Could not expand URL {short_url}: {e}. Using original.")
-        return short_url
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -228,10 +205,6 @@ async def handle_amazon_link(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await update.message.reply_text(loading_msg, reply_markup=get_main_keyboard())
 
     try:
-        # Expand short URLs (amzn.to, amzn.eu, a.co, etc.) to full Amazon URLs
-        final_link = expand_short_url(link)
-        logger.info(f"Using expanded link: {final_link}")
-
         # Generate output using the appropriate agent
         if output_type == "listing":
             if listing_agent is None:
@@ -242,7 +215,7 @@ async def handle_amazon_link(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 )
                 return WAITING_FOR_LINK
 
-            result = listing_agent.generate_listing(final_link)
+            result = listing_agent.generate_listing(link)
         else:
             if reviewer_agent is None:
                 await update.message.reply_text(
@@ -252,7 +225,7 @@ async def handle_amazon_link(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 )
                 return WAITING_FOR_LINK
 
-            result = reviewer_agent.generate_review(final_link)
+            result = reviewer_agent.generate_review(link)
 
         # Send the result as a single message
         await update.message.reply_text(

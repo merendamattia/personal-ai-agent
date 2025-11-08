@@ -2,6 +2,7 @@ import logging
 import os
 from abc import ABC, abstractmethod
 
+import requests
 from datapizza.agents import Agent
 from datapizza.clients.openai import OpenAIClient
 from datapizza.tools.web_fetch import WebFetchTool
@@ -34,6 +35,34 @@ class TruncatedWebFetchTool:
         result = self.original_tool(url)
         result = truncate_to_max_tokens(result, max_tokens=self.max_tokens)
         return result
+
+
+def expand_short_url(short_url: str) -> str:
+    """
+    Expand shortened Amazon URLs (amzn.to, amzn.eu, a.co, etc.)
+    Follows HTTP redirects to get the final full URL
+
+    Args:
+        short_url: The shortened URL to expand
+
+    Returns:
+        str: The expanded full URL, or the original URL if expansion fails
+    """
+    try:
+        # Use requests.get() with allow_redirects to follow all redirects
+        response = requests.get(short_url, allow_redirects=True, timeout=5)
+
+        # Log all redirect history
+        for resp in response.history:
+            logger.info(f"Redirect: status code {resp.status_code} -> {resp.url}")
+
+        # Get the final URL
+        final_url = response.url
+        logger.info(f"Expanded short URL: {short_url} -> {final_url}")
+        return final_url
+    except Exception as e:
+        logger.warning(f"Could not expand URL {short_url}: {e}. Using original.")
+        return short_url
 
 
 class BaseAmazonAgent(ABC):
@@ -99,8 +128,12 @@ class BaseAmazonAgent(ABC):
 
         logger.info(f"Generating {output_type} for: {link}")
 
+        # Expand the URL if it's shortened
+        expanded_link = expand_short_url(link)
+        logger.info(f"Using link: {expanded_link}")
+
         # Format the run prompt with the provided link
-        run_prompt = self.run_prompt_template.format(link=link)
+        run_prompt = self.run_prompt_template.format(link=expanded_link)
 
         # Run the agent
         response = self.agent.run(run_prompt, tool_choice="required_first")
