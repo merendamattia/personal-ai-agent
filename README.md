@@ -63,7 +63,7 @@ An intelligent AI agent that generates detailed and professional Amazon product 
    **For Google (default provider):**
    ```env
    GOOGLE_API_KEY=your_api_key_here
-   GOOGLE_MODEL=gemini-1.5-flash
+   GOOGLE_MODEL=gemini-2.5-flash
    TELEGRAM_BOT_TOKEN=your_telegram_token_here  # Optional
    ```
 
