@@ -1,3 +1,15 @@
+# [1.4.0](https://github.com/merendamattia/amazon-ai-agent/compare/v1.3.1...v1.4.0) (2025-11-08)
+
+
+### Features
+
+* add multi-provider support for AI models (OpenAI and Google) with updated configuration ([0fa6952](https://github.com/merendamattia/amazon-ai-agent/commit/0fa6952c2b072ca628d783f1206a885ba32203aa))
+
+
+### Performance Improvements
+
+* correct MAX_TOKENS value in .env.example for optimal web content processing ([9d9a6f3](https://github.com/merendamattia/amazon-ai-agent/commit/9d9a6f3a02f0baed1c7abc09705f76923d7eea20))
+
 ## [1.3.1](https://github.com/merendamattia/amazon-ai-agent/compare/v1.3.0...v1.3.1) (2025-11-08)
 
 
