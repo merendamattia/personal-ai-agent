@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/merendamattia/amazon-ai-agent/compare/v1.4.1...v1.4.2) (2025-11-16)
+
+
+### Bug Fixes
+
+* update Google API key placeholder and adjust OpenAI model and MAX_TOKENS value in .env.example ([9e8244c](https://github.com/merendamattia/amazon-ai-agent/commit/9e8244ca7e17a5d4cdaed9ef9bf9ba49e78507c0))
+
 ## [1.4.1](https://github.com/merendamattia/amazon-ai-agent/compare/v1.4.0...v1.4.1) (2025-11-14)
 
 
