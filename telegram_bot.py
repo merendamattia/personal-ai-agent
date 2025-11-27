@@ -36,12 +36,15 @@ WAITING_FOR_LINK, SELECTING_CONDITION, GENERATING_OUTPUT = range(3)
 
 # Item condition options for sales listings
 ITEM_CONDITIONS = [
-    ("🏷️ Nuovo con cartellino", "nuovo_con_cartellino"),
-    ("✨ Nuovo senza cartellino", "nuovo_senza_cartellino"),
-    ("🌟 Come nuovo / Eccellente", "come_nuovo"),
-    ("👍 Buono", "buono"),
-    ("📦 Usato", "usato"),
+    ("🏷️ Nuovo con cartellino", "nuovo_con_cartellino", "Nuovo con cartellino"),
+    ("✨ Nuovo senza cartellino", "nuovo_senza_cartellino", "Nuovo senza cartellino"),
+    ("🌟 Come nuovo / Eccellente", "come_nuovo", "Come nuovo / Eccellente"),
+    ("👍 Buono", "buono", "Buono"),
+    ("📦 Usato", "usato", "Usato"),
 ]
+
+# Default condition for listings
+DEFAULT_ITEM_CONDITION = "Nuovo"
 
 # Global agent instances
 reviewer_agent = None
@@ -227,8 +230,8 @@ async def handle_product_link(
 
         # Create inline keyboard for condition selection
         keyboard = [
-            [InlineKeyboardButton(label, callback_data=f"condition:{value}")]
-            for label, value in ITEM_CONDITIONS
+            [InlineKeyboardButton(display_label, callback_data=f"condition:{value}")]
+            for display_label, value, _ in ITEM_CONDITIONS
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -256,16 +259,15 @@ async def handle_condition_selection(
 
     condition_value = callback_data.replace("condition:", "")
 
-    # Find the human-readable label for the condition
+    # Find the human-readable label for the condition (without emoji)
     condition_label = None
-    for label, value in ITEM_CONDITIONS:
+    for _, value, clean_label in ITEM_CONDITIONS:
         if value == condition_value:
-            # Remove emoji from label for cleaner output
-            condition_label = label.split(" ", 1)[1] if " " in label else label
+            condition_label = clean_label
             break
 
     if not condition_label:
-        condition_label = "Non specificata"
+        condition_label = DEFAULT_ITEM_CONDITION
 
     # Store the condition
     context.user_data["item_condition"] = condition_label
@@ -336,7 +338,9 @@ async def generate_output(
                 return WAITING_FOR_LINK
 
             # Get the item condition
-            item_condition = context.user_data.get("item_condition", "Nuovo")
+            item_condition = context.user_data.get(
+                "item_condition", DEFAULT_ITEM_CONDITION
+            )
             result = listing_agent.generate_listing(link, item_condition)
         else:
             if reviewer_agent is None:
