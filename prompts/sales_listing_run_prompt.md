@@ -1,24 +1,32 @@
-Crea un annuncio di vendita completo in italiano per il prodotto al seguente link: {link}.
+# TASK
+Crea un annuncio di vendita in italiano per il prodotto al link: {link}
+Condizione: {item_condition}
 
-L'annuncio deve essere strutturato per piattaforme come Vinted, Subito, eBay o Facebook Marketplace e deve includere:
+# STRUCTURE
+1. Titolo: max 50 caratteri, accattivante
+2. Descrizione: 4-6 righe con caratteristiche principali
+3. Punti di forza: 3-5 caratteristiche chiave
+4. Condizione: specifica "{item_condition}"
+Totale: massimo 15 righe, discorso unico (no paragrafi)
 
-1. Titolo: Un titolo accattivante e chiaro (1 riga, massimo 50 caratteri)
-2. Descrizione: Presentazione del prodotto con le caratteristiche principali (4-6 righe)
-3. Caratteristiche chiave: Elenco puntato dei punti di forza (3-5 punti)
-4. Condizioni: Specifica che il prodotto è in condizione "{item_condition}"
+# RULES
+1. Non inventare caratteristiche non presenti
+2. Basa tutto su informazioni reali del prodotto
+3. Non separare in sezioni numerate
+4. Flusso naturale e conversazionale
 
-Usa un tono professionale ma amichevole. Non inventare caratteristiche non presenti. Massimo 15 righe totali. Non creare paragrafi, crea un discorso unico.
+# STYLE
+- Tono: amichevole, come descrivere a un amico
+- Linguaggio naturale e colloquiale
+- NON da annuncio commerciale professionale
+- Evita formule pubblicitarie tipiche
+- Scritto da persona reale che rivende
 
-STILE IMPORTANTE:
-- Scrivi come se fosse una persona reale che rivende il prodotto
-- NON deve sembrare un annuncio commerciale professionale
-- Usa un linguaggio naturale e colloquiale
-- Non usare le formule pubblicitarie tipiche
-- Scrivi come se stessi descrivendo il prodotto a un amico
-
-IMPORTANTE:
-- Scrivi SOLO l'annuncio in risposta
-- NON usare formattazione markdown
-- Usa PLAIN TEXT
-- NON aggiungere spiegazioni, titoli o altro
-- Rispondi direttamente con il contenuto dell'annuncio
+# EXECUTION
+Rispondi SOLO con l'annuncio:
+- Nessuna formattazione markdown
+- Plain text puro
+- Nessuna spiegazione o prefissi
+- Inizia direttamente con il titolo e successivamente continua con il contenuto
+- Aggiungi un elenco puntato con i 5 punti di forza / caratteristiche principali del prodotto
+- Infine, aggiungi qualche keyword per aumentare possibilità di essere trovati nelle piattaforme
