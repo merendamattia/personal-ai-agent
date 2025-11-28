@@ -1,3 +1,16 @@
+# [1.5.0](https://github.com/merendamattia/amazon-ai-agent/compare/v1.4.2...v1.5.0) (2025-11-28)
+
+
+### Bug Fixes
+
+* Address code review feedback on item condition handling ([292e7ec](https://github.com/merendamattia/amazon-ai-agent/commit/292e7ec9372801dcce4a4102ccb2ca5d1ed6eb06))
+
+
+### Features
+
+* Add generic product URLs and item condition selection for sales listings ([f0eac71](https://github.com/merendamattia/amazon-ai-agent/commit/f0eac71d3d6c57891cb7546317ea3d98e9efbe4e))
+* enhance prompts with clearer structure and execution guidelines ([671bd52](https://github.com/merendamattia/amazon-ai-agent/commit/671bd5282f01a7cbb5b22108117b6aaaee461292))
+
 ## [1.4.2](https://github.com/merendamattia/amazon-ai-agent/compare/v1.4.1...v1.4.2) (2025-11-16)
 
 
