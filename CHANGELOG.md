@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/merendamattia/amazon-ai-agent/compare/v1.5.0...v1.6.0) (2025-11-28)
+
+
+### Features
+
+* add examples to review and sales listing prompts for better guidance ([5948f60](https://github.com/merendamattia/amazon-ai-agent/commit/5948f60e014420a10f9f95e9d73b77eefbac93d4))
+
 # [1.5.0](https://github.com/merendamattia/amazon-ai-agent/compare/v1.4.2...v1.5.0) (2025-11-28)
 
 
