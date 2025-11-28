@@ -63,13 +63,14 @@ class BaseAmazonAgent(ABC):
 
         logger.info("Agent initialized successfully")
 
-    def _generate(self, link, output_type):
+    def _generate(self, link, output_type, **kwargs):
         """
-        Generate output for the given Amazon product link
+        Generate output for the given product link
 
         Args:
-            link: Amazon product URL
+            link: Product URL
             output_type: Type of output being generated (for logging)
+            **kwargs: Additional parameters to pass to the prompt template
 
         Returns:
             str: Generated output text
@@ -83,8 +84,12 @@ class BaseAmazonAgent(ABC):
         expanded_link = expand_short_url(link)
         logger.info(f"Using link: {expanded_link}")
 
-        # Format the run prompt with the provided link
-        run_prompt = self.run_prompt_template.format(link=expanded_link)
+        # Build the prompt parameters
+        prompt_params = {"link": expanded_link}
+        prompt_params.update(kwargs)
+
+        # Format the run prompt with the provided parameters
+        run_prompt = self.run_prompt_template.format(**prompt_params)
 
         # Run the agent
         response = self.agent.run(run_prompt, tool_choice="required_first")

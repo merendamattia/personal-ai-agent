@@ -16,14 +16,15 @@ class AmazonSalesListingAgent(BaseAmazonAgent):
         """Return the name of the agent"""
         return "AmazonSalesListingAgent"
 
-    def generate_listing(self, link):
+    def generate_listing(self, link, item_condition):
         """
-        Generate a sales listing for the given Amazon product link
+        Generate a sales listing for the given product link
 
         Args:
-            link: Amazon product URL
+            link: Product URL (can be Amazon or any other website)
+            item_condition: The condition of the item
 
         Returns:
             str: Generated sales listing text
         """
-        return self._generate(link, "sales listing")
+        return self._generate(link, "sales listing", item_condition=item_condition)
