@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from agents.amazon_reviewer_agent import AmazonReviewerAgent
 from agents.amazon_sales_listing_agent import AmazonSalesListingAgent
 from agents.prompt_optimizer_agent import PromptOptimizerAgent
+from agents.email_rewriter_agent import EmailRewriterAgent
 
 # Configure logger
 logging.basicConfig(
@@ -39,14 +40,14 @@ def _load_environment(provider):
 def _parse_arguments():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(
-        description="Generate an Amazon product review, sales listing, or optimize a prompt using an AI agent"
+        description="Generate an Amazon product review, sales listing, optimize a prompt, or rewrite an email using an AI agent"
     )
-    parser.add_argument("link", nargs="?", help="Amazon product link or prompt text")
+    parser.add_argument("link", nargs="?", help="Amazon product link, prompt text, or email text")
     parser.add_argument(
         "--type",
-        choices=["review", "listing", "optimize-prompt"],
+        choices=["review", "listing", "optimize-prompt", "rewrite-email"],
         default="review",
-        help="Output type: 'review' for product review, 'listing' for sales listing, or 'optimize-prompt' for prompt optimization (default: review)",
+        help="Output type: 'review' for product review, 'listing' for sales listing, 'optimize-prompt' for prompt optimization, or 'rewrite-email' for email rewriting (default: review)",
     )
     parser.add_argument(
         "--provider",
@@ -101,6 +102,16 @@ def main():
             result = output["result"]
             tokens = output["tokens"]
             logger.info("Prompt optimized successfully")
+        elif output_type == "rewrite-email":
+            agent = EmailRewriterAgent(api_key, model, provider=provider)
+            logger.info("Email Rewriter Agent initialized")
+
+            # Rewrite email
+            logger.info("Rewriting email...")
+            output = agent.rewrite_email(link)
+            result = output["result"]
+            tokens = output["tokens"]
+            logger.info("Email rewritten successfully")
         else:
             agent = AmazonReviewerAgent(api_key, model, provider=provider)
             logger.info("Reviewer Agent initialized")

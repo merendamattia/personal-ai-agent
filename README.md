@@ -4,7 +4,7 @@
 [![Latest Release](https://img.shields.io/github/v/release/merendamattia/amazon-ai-agent?label=release)](https://github.com/merendamattia/amazon-ai-agent/releases)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/)
 
-An intelligent AI agent that generates detailed and professional Amazon product reviews, sales listings, and optimizes prompts using KERNEL principles. Powered by OpenAI and Google AI models with advanced web scraping and content analysis capabilities.
+An intelligent AI agent that generates detailed and professional Amazon product reviews, sales listings, optimizes prompts using KERNEL principles, and rewrites emails with different tones. Powered by OpenAI and Google AI models with advanced web scraping and content analysis capabilities.
 
 ## ✨ Features
 
@@ -12,6 +12,7 @@ An intelligent AI agent that generates detailed and professional Amazon product 
 - 📝 **Product Reviews** - Generate detailed and professional Amazon product reviews
 - 💼 **Sales Listings** - Create persuasive sales listings for platforms like eBay, Subito, or Facebook Marketplace
 - ✨ **Prompt Optimizer** - Rewrite and optimize prompts following KERNEL framework principles
+- 📧 **Email Rewriter** - Rewrite emails with different tones (formal, friendly, diplomatic, assertive, empathetic)
 - 🔗 **Direct Link Processing** - Paste an Amazon product link and get instant output
 - 📱 **Telegram Bot** - Interact with all agents directly through Telegram
 - 🌐 **Web Content Extraction** - Advanced web fetching with intelligent token management
@@ -77,7 +78,7 @@ An intelligent AI agent that generates detailed and professional Amazon product 
 
 ### Running the Application
 
-#### CLI - Generate a review, sales listing, or optimize a prompt:
+#### CLI - Generate a review, sales listing, optimize a prompt, or rewrite an email:
 
 ```bash
 # Generate a review using default provider (Google)
@@ -89,6 +90,9 @@ python app.py --type listing https://www.amazon.com/your-product-link
 # Optimize a prompt following KERNEL principles
 python app.py --type optimize-prompt "Your prompt text here"
 
+# Rewrite an email
+python app.py --type rewrite-email "Your email text here"
+
 # Use OpenAI provider explicitly
 python app.py --provider openai https://www.amazon.com/your-product-link
 
@@ -97,12 +101,16 @@ python app.py --type listing --provider openai https://www.amazon.com/your-produ
 
 # Optimize prompt with OpenAI
 python app.py --type optimize-prompt --provider openai "Your prompt text here"
+
+# Rewrite email with OpenAI
+python app.py --type rewrite-email --provider openai "Your email text here"
 ```
 
 **Output Types:**
 - `review` (default) - Generate Amazon product reviews
 - `listing` - Create sales listings for secondary markets
 - `optimize-prompt` - Rewrite prompts using KERNEL structure
+- `rewrite-email` - Rewrite emails with different tones
 
 **Supported providers:**
 - `google` (default) - Uses Google's Gemini models
@@ -128,7 +136,8 @@ Then open Telegram, find your bot, and start using it!
 - 📝 Interactive menu to generate reviews
 - 💼 Create sales listings with condition selection
 - ✨ Optimize and rewrite prompts using KERNEL principles
-- 🔗 Simply paste Amazon links or prompt text
+- 📧 Rewrite emails with different tones
+- 🔗 Simply paste Amazon links, prompt text, or email text
 - ⏳ Real-time processing status updates with token counting
 - 📊 Input token display for cost monitoring
 - 💬 Support for long outputs (automatically split into multiple messages)
@@ -156,7 +165,8 @@ amazon-ai-agent/
 │   ├── base_agent.py               # Abstract base class for all agents
 │   ├── amazon_reviewer_agent.py     # Product review generation
 │   ├── amazon_sales_listing_agent.py # Sales listing generation
-│   └── prompt_optimizer_agent.py    # Prompt optimization using KERNEL
+│   ├── prompt_optimizer_agent.py    # Prompt optimization using KERNEL
+│   └── email_rewriter_agent.py # Email rewriting with tone selection
 ├── tools/                           # Custom tools for agents
 │   └── web_fetch.py                # Web content extraction
 ├── utils/                           # Utility functions
@@ -170,7 +180,9 @@ amazon-ai-agent/
 │   ├── sales_listing_system_prompt.md
 │   ├── sales_listing_run_prompt.md
 │   ├── prompt_optimizer_system_prompt.md
-│   └── prompt_optimizer_run_prompt.md
+│   ├── prompt_optimizer_run_prompt.md
+│   ├── email_rewriter_system_prompt.md
+│   └── email_rewriter_run_prompt.md
 ├── app.py                           # CLI entry point
 ├── telegram_bot.py                  # Telegram bot interface
 └── README.md                        # This file

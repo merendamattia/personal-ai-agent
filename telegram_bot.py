@@ -22,6 +22,7 @@ from telegram.ext import (
 from agents.amazon_reviewer_agent import AmazonReviewerAgent
 from agents.amazon_sales_listing_agent import AmazonSalesListingAgent
 from agents.prompt_optimizer_agent import PromptOptimizerAgent
+from agents.email_rewriter_agent import EmailRewriterAgent
 
 # Load environment variables
 load_dotenv()
@@ -33,7 +34,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Conversation states
-WAITING_FOR_LINK, SELECTING_CONDITION, GENERATING_OUTPUT, WAITING_FOR_PROMPT = range(4)
+WAITING_FOR_LINK, SELECTING_CONDITION, GENERATING_OUTPUT, WAITING_FOR_PROMPT, WAITING_FOR_EMAIL, SELECTING_EMAIL_TONE = range(6)
 
 # Item condition options for sales listings
 ITEM_CONDITIONS = [
@@ -47,10 +48,20 @@ ITEM_CONDITIONS = [
 # Default condition for listings
 DEFAULT_ITEM_CONDITION = "Nuovo"
 
+# Email tone options
+EMAIL_TONES = [
+    ("🎩 Formale", "formal"),
+    ("👋 Amichevole", "friendly"),
+    ("🤝 Diplomatico", "diplomatic"),
+    ("💪 Assertivo", "assertive"),
+    ("❤️ Empatico", "empathetic"),
+]
+
 # Global agent instances
 reviewer_agent = None
 listing_agent = None
 prompt_optimizer_agent = None
+email_rewriter_agent = None
 provider = "google"  # Default provider
 
 
@@ -60,8 +71,8 @@ def get_main_keyboard():
     return ReplyKeyboardMarkup(
         [
             ["📝 Genera Recensione", "💼 Genera Annuncio"],
-            ["✨ Ottimizza Prompt", "ℹ️ Aiuto"],
-            ["❌ Stop"],
+            ["✨ Ottimizza Prompt", "📧 Riscrivi Email"],
+            ["ℹ️ Aiuto", "❌ Stop"],
         ],
         resize_keyboard=True,
         one_time_keyboard=False,
@@ -69,8 +80,8 @@ def get_main_keyboard():
 
 
 def _initialize_agent():
-    """Initialize the Amazon Reviewer, Sales Listing, and Prompt Optimizer Agents"""
-    global reviewer_agent, listing_agent, prompt_optimizer_agent
+    """Initialize all agents"""
+    global reviewer_agent, listing_agent, prompt_optimizer_agent, email_rewriter_agent
     try:
         # Determine which provider and keys to use
         if provider.lower() == "openai":
@@ -92,6 +103,7 @@ def _initialize_agent():
         reviewer_agent = AmazonReviewerAgent(api_key, model, provider=provider)
         listing_agent = AmazonSalesListingAgent(api_key, model, provider=provider)
         prompt_optimizer_agent = PromptOptimizerAgent(api_key, model, provider=provider)
+        email_rewriter_agent = EmailRewriterAgent(api_key, model, provider=provider)
         logger.info(
             f"All agents initialized successfully with provider: {provider}"
         )
@@ -165,6 +177,21 @@ async def handle_button_press(
         )
         await update.message.reply_text(message, reply_markup=get_main_keyboard())
         return WAITING_FOR_PROMPT
+
+    elif user_input == "📧 Riscrivi Email":
+        context.user_data["output_type"] = "rewrite-email"
+        message = (
+            "📧 Per favore, inviami l'email che desideri riscrivere\n\n"
+            "📝 Puoi inviare:\n"
+            "• Email informale che vuoi riscrivere con un certo tono\n"
+            "• Email con errori di grammatica da correggere\n"
+            "• Qualsiasi testo che vuoi trasformare in email\n\n"
+            "Dopo l'invio, potrai scegliere il tono desiderato (Formale, Amichevole, ecc.)\n\n"
+            "⏳ La riscrittura potrebbe richiedere un minuto...\n\n"
+            "Usa il pulsante ❌ Stop per annullare in qualsiasi momento."
+        )
+        await update.message.reply_text(message, reply_markup=get_main_keyboard())
+        return WAITING_FOR_EMAIL
 
     elif user_input == "ℹ️ Aiuto":
         help_text = (
@@ -292,6 +319,85 @@ async def handle_prompt_input(
     return await generate_output(update, context, prompt_text, "optimize-prompt")
 
 
+async def handle_email_input(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Handle email text input for professionalization"""
+    email_text = update.message.text.strip()
+
+    if not email_text:
+        await update.message.reply_text(
+            "❌ L'email non può essere vuota\n\n"
+            "Per favore, inviami il testo dell'email che desideri professionalizzare.",
+            reply_markup=get_main_keyboard(),
+        )
+        return WAITING_FOR_EMAIL
+
+    logger.info(f"User {update.effective_user.id} requested email rewriting")
+
+    # Store email text
+    context.user_data["email_text"] = email_text
+
+    # Show tone selection
+    tone_buttons = [
+        [InlineKeyboardButton(emoji_name, callback_data=f"tone:{callback_data}")]
+        for emoji_name, callback_data in EMAIL_TONES
+    ]
+    keyboard = InlineKeyboardMarkup(tone_buttons)
+
+    message = (
+        "🎯 Che tono desideri per la tua email?\n\n"
+        "Scegli uno dei seguenti stili:"
+    )
+    await update.message.reply_text(message, reply_markup=keyboard)
+
+    return SELECTING_EMAIL_TONE
+
+
+async def handle_email_tone_selection(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Handle email tone selection from inline keyboard"""
+    query = update.callback_query
+    await query.answer()
+
+    # Parse the callback data
+    callback_data = query.data
+    if not callback_data.startswith("tone:"):
+        return SELECTING_EMAIL_TONE
+
+    tone_value = callback_data.replace("tone:", "")
+
+    # Find the human-readable label for the tone (without emoji)
+    tone_label = None
+    for _, tone_id in EMAIL_TONES:
+        if tone_id == tone_value:
+            tone_label = tone_id
+            break
+
+    if not tone_label:
+        tone_label = "formal"
+
+    # Store the tone
+    context.user_data["email_tone"] = tone_label
+
+    # Get email text
+    email_text = context.user_data.get("email_text", "")
+
+    logger.info(f"User {update.effective_user.id} selected tone: {tone_label}")
+
+    # Show loading message
+    loading_msg = (
+        "⏳ Sto riscrivendo la tua email...\n\n"
+        "Questo potrebbe richiedere un minuto... Per favore, aspetta.\n\n"
+        "🔄 Applicando il tono desiderato..."
+    )
+    await query.edit_message_text(loading_msg)
+
+    # Generate output with tone
+    return await generate_output(update, context, email_text, "rewrite-email", tone=tone_label, message_obj=query.message)
+
+
 async def handle_condition_selection(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -351,6 +457,8 @@ async def generate_output(
     link: str,
     output_type: str,
     message_obj=None,
+    tone=None,
+    **kwargs,
 ) -> int:
     """Generate review, listing, or optimized prompt output"""
 
@@ -372,6 +480,8 @@ async def generate_output(
         success_header = "💼 ANNUNCIO DI VENDITA GENERATO"
     elif output_type == "optimize-prompt":
         success_header = "✨ PROMPT OTTIMIZZATO"
+    elif output_type == "rewrite-email":
+        success_header = "📧 EMAIL RISCRITTA"
     else:
         success_header = "📝 RECENSIONE GENERATA"
 
@@ -403,6 +513,20 @@ async def generate_output(
                 return WAITING_FOR_LINK
 
             output = prompt_optimizer_agent.optimize_prompt(link)
+            result = output["result"]
+            tokens = output["tokens"]
+        elif output_type == "rewrite-email":
+            if email_rewriter_agent is None:
+                await message_obj.reply_text(
+                    "❌ Errore: L'agente non è stato inizializzato.\n\n"
+                    "Usa /start per ricominciare.",
+                    reply_markup=get_main_keyboard(),
+                )
+                return WAITING_FOR_LINK
+
+            # Use the tone from context or parameter
+            email_tone = tone or context.user_data.get("email_tone", "formal")
+            output = email_rewriter_agent.rewrite_email(link, email_tone)
             result = output["result"]
             tokens = output["tokens"]
         else:
@@ -542,8 +666,14 @@ def main() -> None:
             WAITING_FOR_PROMPT: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_prompt_input),
             ],
+            WAITING_FOR_EMAIL: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_email_input),
+            ],
             SELECTING_CONDITION: [
                 CallbackQueryHandler(handle_condition_selection, pattern="^condition:"),
+            ],
+            SELECTING_EMAIL_TONE: [
+                CallbackQueryHandler(handle_email_tone_selection, pattern="^tone:"),
             ],
             GENERATING_OUTPUT: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_button_press),
