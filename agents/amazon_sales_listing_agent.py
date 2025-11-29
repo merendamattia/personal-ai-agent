@@ -27,4 +27,6 @@ class AmazonSalesListingAgent(BaseAmazonAgent):
         Returns:
             dict: Dictionary with 'result' (listing text) and 'tokens' (token count)
         """
-        return self._generate_with_link(link, "sales listing", item_condition=item_condition)
+        return self._generate_with_link(
+            link, "sales listing", item_condition=item_condition
+        )

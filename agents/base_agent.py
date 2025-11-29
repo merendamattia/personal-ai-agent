@@ -91,7 +91,9 @@ class BaseAmazonAgent(ABC):
         response = self.agent.run(run_prompt)
         result = response.text
 
-        logger.info(f"{output_type.capitalize()} generated successfully (tokens: {token_count})")
+        logger.info(
+            f"{output_type.capitalize()} generated successfully (tokens: {token_count})"
+        )
         return {"result": result, "tokens": token_count}
 
     def _generate_with_link(self, link, output_type, **kwargs):
@@ -109,7 +111,9 @@ class BaseAmazonAgent(ABC):
         if not self.agent:
             raise RuntimeError("Agent not initialized")
 
-        logger.info(f"Generating {output_type} for: {link[:50] if len(link) > 50 else link}")
+        logger.info(
+            f"Generating {output_type} for: {link[:50] if len(link) > 50 else link}"
+        )
 
         # Only expand URL if it's a real link (starts with http)
         if link.startswith(("http://", "https://")):
@@ -134,7 +138,9 @@ class BaseAmazonAgent(ABC):
         response = self.agent.run(run_prompt, tool_choice="required_first")
         result = response.text
 
-        logger.info(f"{output_type.capitalize()} generated successfully (tokens: {token_count})")
+        logger.info(
+            f"{output_type.capitalize()} generated successfully (tokens: {token_count})"
+        )
         return {"result": result, "tokens": token_count}
 
     @abstractmethod

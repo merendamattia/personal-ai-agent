@@ -50,4 +50,3 @@ def truncate_to_max_tokens(text, max_tokens=None):
         return truncated_text
 
     return text
-

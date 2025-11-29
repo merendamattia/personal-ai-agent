@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 
 from agents.amazon_reviewer_agent import AmazonReviewerAgent
 from agents.amazon_sales_listing_agent import AmazonSalesListingAgent
-from agents.prompt_optimizer_agent import PromptOptimizerAgent
 from agents.email_rewriter_agent import EmailRewriterAgent
+from agents.prompt_optimizer_agent import PromptOptimizerAgent
 
 # Configure logger
 logging.basicConfig(
@@ -42,7 +42,9 @@ def _parse_arguments():
     parser = argparse.ArgumentParser(
         description="Generate an Amazon product review, sales listing, optimize a prompt, or rewrite an email using an AI agent"
     )
-    parser.add_argument("link", nargs="?", help="Amazon product link, prompt text, or email text")
+    parser.add_argument(
+        "link", nargs="?", help="Amazon product link, prompt text, or email text"
+    )
     parser.add_argument(
         "--type",
         choices=["review", "listing", "optimize-prompt", "rewrite-email"],

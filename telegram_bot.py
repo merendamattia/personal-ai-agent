@@ -21,8 +21,8 @@ from telegram.ext import (
 
 from agents.amazon_reviewer_agent import AmazonReviewerAgent
 from agents.amazon_sales_listing_agent import AmazonSalesListingAgent
-from agents.prompt_optimizer_agent import PromptOptimizerAgent
 from agents.email_rewriter_agent import EmailRewriterAgent
+from agents.prompt_optimizer_agent import PromptOptimizerAgent
 
 # Load environment variables
 load_dotenv()
@@ -34,7 +34,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Conversation states
-WAITING_FOR_LINK, SELECTING_CONDITION, GENERATING_OUTPUT, WAITING_FOR_PROMPT, WAITING_FOR_EMAIL, SELECTING_EMAIL_TONE = range(6)
+(
+    WAITING_FOR_LINK,
+    SELECTING_CONDITION,
+    GENERATING_OUTPUT,
+    WAITING_FOR_PROMPT,
+    WAITING_FOR_EMAIL,
+    SELECTING_EMAIL_TONE,
+) = range(6)
 
 # Item condition options for sales listings
 ITEM_CONDITIONS = [
@@ -69,10 +76,11 @@ async def _get_latest_version():
     """Fetch the latest version from GitHub"""
     try:
         import httpx
+
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 "https://api.github.com/repos/merendamattia/personal-ai-agent/releases/latest",
-                timeout=5
+                timeout=5,
             )
             if response.status_code == 200:
                 data = response.json()
@@ -121,9 +129,7 @@ def _initialize_agent():
         listing_agent = AmazonSalesListingAgent(api_key, model, provider=provider)
         prompt_optimizer_agent = PromptOptimizerAgent(api_key, model, provider=provider)
         email_rewriter_agent = EmailRewriterAgent(api_key, model, provider=provider)
-        logger.info(
-            f"All agents initialized successfully with provider: {provider}"
-        )
+        logger.info(f"All agents initialized successfully with provider: {provider}")
         return True
     except Exception as e:
         logger.error(f"Failed to initialize agents: {e}")
@@ -218,7 +224,9 @@ async def handle_button_press(
             f"👤 Creato da: [merendamattia](https://github.com/merendamattia)\n"
             f"📦 Repository: [personal-ai-agent](https://github.com/merendamattia/personal-ai-agent)\n"
         )
-        await update.message.reply_text(info_text, reply_markup=get_main_keyboard(), parse_mode="Markdown")
+        await update.message.reply_text(
+            info_text, reply_markup=get_main_keyboard(), parse_mode="Markdown"
+        )
         return WAITING_FOR_LINK
 
     elif user_input == "❌ Stop":
@@ -324,9 +332,7 @@ async def handle_prompt_input(
     return await generate_output(update, context, prompt_text, "optimize-prompt")
 
 
-async def handle_email_input(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
+async def handle_email_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Handle email text input for professionalization"""
     email_text = update.message.text.strip()
 
@@ -351,8 +357,7 @@ async def handle_email_input(
     keyboard = InlineKeyboardMarkup(tone_buttons)
 
     message = (
-        "🎯 Che tono desideri per la tua email?\n\n"
-        "Scegli uno dei seguenti stili:"
+        "🎯 Che tono desideri per la tua email?\n\n" "Scegli uno dei seguenti stili:"
     )
     await update.message.reply_text(message, reply_markup=keyboard)
 
@@ -400,7 +405,14 @@ async def handle_email_tone_selection(
     await query.edit_message_text(loading_msg)
 
     # Generate output with tone
-    return await generate_output(update, context, email_text, "rewrite-email", tone=tone_label, message_obj=query.message)
+    return await generate_output(
+        update,
+        context,
+        email_text,
+        "rewrite-email",
+        tone=tone_label,
+        message_obj=query.message,
+    )
 
 
 async def handle_condition_selection(
