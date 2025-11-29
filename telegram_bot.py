@@ -146,10 +146,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     welcome_message = (
         f"👋 Ciao {user.first_name}!\n\n"
-        "🤖 Sono il tuo Amazon AI Agent Bot.\n\n"
-        "✨ Posso aiutarti a:\n"
-        "• 📝 Generare recensioni dettagliate\n"
-        "• 💼 Creare annunci di vendita professionali\n\n"
+        "🤖 Sono il tuo Personal AI Agent.\n\n"
+        "✨ Posso aiutarti con:\n"
+        "• Generazione di contenuti\n"
+        "• Ottimizzazione di testi\n"
+        "• E molto altro!\n\n"
         "📱 Usa i pulsanti qui sotto per iniziare:"
     )
 
