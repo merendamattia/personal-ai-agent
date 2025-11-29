@@ -1,7 +1,7 @@
 # 📝 Personal AI Agent
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Latest Release](https://img.shields.io/github/v/release/merendamattia/amazon-ai-agent?label=release)](https://github.com/merendamattia/amazon-ai-agent/releases)
+[![Latest Release](https://img.shields.io/github/v/release/merendamattia/personal-ai-agent?label=release)](https://github.com/merendamattia/personal-ai-agent/releases)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/)
 
 An intelligent AI agent that generates detailed and professional Amazon product reviews, sales listings, optimizes prompts using KERNEL principles, and rewrites emails with different tones. Powered by OpenAI and Google AI models with advanced web scraping and content analysis capabilities.
@@ -34,14 +34,14 @@ An intelligent AI agent that generates detailed and professional Amazon product 
 
 1. **Clone the repository and enter the directory:**
    ```bash
-   git clone https://github.com/merendamattia/amazon-ai-agent.git
-   cd amazon-ai-agent
+   git clone https://github.com/merendamattia/personal-ai-agent.git
+   cd personal-ai-agent
    ```
 
 2. **Create and activate a Python virtual environment:**
    ```bash
-   conda create --name amazon-ai-agent-env python=3.11.13
-   conda activate amazon-ai-agent-env
+   conda create --name personal-ai-agent-env python=3.11.13
+   conda activate personal-ai-agent-env
    ```
 
    Or using venv:
@@ -132,68 +132,13 @@ python telegram_bot.py --provider openai
 
 Then open Telegram, find your bot, and start using it!
 
-**Bot Features:**
-- 📝 Interactive menu to generate reviews
-- 💼 Create sales listings with condition selection
-- ✨ Optimize and rewrite prompts using KERNEL principles
-- 📧 Rewrite emails with different tones
-- 🔗 Simply paste Amazon links, prompt text, or email text
-- ⏳ Real-time processing status updates with token counting
-- 📊 Input token display for cost monitoring
-- 💬 Support for long outputs (automatically split into multiple messages)
-- ❌ Easy cancel option
-- ℹ️ Built-in help guide
-
-## 📚 Understanding the KERNEL Framework
-
-The **Prompt Optimizer Agent** uses the KERNEL framework to improve prompt effectiveness:
-
-- **K**nowledge: Context and background information for the LLM
-- **E**xample: Concrete input/output examples
-- **R**ules: Constraints and requirements
-- **N**uances: Subtle details and edge cases
-- **E**xecution: Clear format and delivery instructions
-- **L**imits: Boundaries and token/length constraints
-
-This structure significantly improves LLM comprehension and output quality.
-
-## 📁 Project Structure
-
-```
-amazon-ai-agent/
-├── agents/                          # AI agent implementations
-│   ├── base_agent.py               # Abstract base class for all agents
-│   ├── amazon_reviewer_agent.py     # Product review generation
-│   ├── amazon_sales_listing_agent.py # Sales listing generation
-│   ├── prompt_optimizer_agent.py    # Prompt optimization using KERNEL
-│   └── email_rewriter_agent.py # Email rewriting with tone selection
-├── tools/                           # Custom tools for agents
-│   └── web_fetch.py                # Web content extraction
-├── utils/                           # Utility functions
-│   ├── client_utils.py             # LLM client factory
-│   ├── prompt_loader.py            # Dynamic prompt loading
-│   ├── token_utils.py              # Token counting and management
-│   └── url_utils.py                # URL expansion and validation
-├── prompts/                         # Markdown-based prompt templates
-│   ├── review_system_prompt.md
-│   ├── review_run_prompt.md
-│   ├── sales_listing_system_prompt.md
-│   ├── sales_listing_run_prompt.md
-│   ├── prompt_optimizer_system_prompt.md
-│   ├── prompt_optimizer_run_prompt.md
-│   ├── email_rewriter_system_prompt.md
-│   └── email_rewriter_run_prompt.md
-├── app.py                           # CLI entry point
-├── telegram_bot.py                  # Telegram bot interface
-└── README.md                        # This file
-```
 
 ### Docker
 
 **Telegram Bot Mode:**
 ```bash
-docker build -t amazon-ai-agent:local .
-docker run --env-file .env --restart unless-stopped amazon-ai-agent:local
+docker build -t personal-ai-agent:local .
+docker run --env-file .env --restart unless-stopped personal-ai-agent:local
 ```
 
 **Docker Compose (easiest):**
@@ -238,7 +183,7 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](./LICE
 ## 📞 Support
 
 For issues, feature requests, or questions:
-- Open an [issue on GitHub](https://github.com/merendamattia/amazon-ai-agent/issues)
+- Open an [issue on GitHub](https://github.com/merendamattia/personal-ai-agent/issues)
 
 ## 🙏 Acknowledgments
 
