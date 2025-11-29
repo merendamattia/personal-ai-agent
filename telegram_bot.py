@@ -65,6 +65,23 @@ email_rewriter_agent = None
 provider = "google"  # Default provider
 
 
+async def _get_latest_version():
+    """Fetch the latest version from GitHub"""
+    try:
+        import httpx
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://api.github.com/repos/merendamattia/personal-ai-agent/releases/latest",
+                timeout=5
+            )
+            if response.status_code == 200:
+                data = response.json()
+                return data.get("tag_name", "Unknown")
+    except Exception as e:
+        logger.debug(f"Could not fetch version from GitHub: {e}")
+    return "Unknown"
+
+
 # Main keyboard layout
 def get_main_keyboard():
     """Get the main keyboard with persistent buttons"""
@@ -72,7 +89,7 @@ def get_main_keyboard():
         [
             ["📝 Genera Recensione", "💼 Genera Annuncio"],
             ["✨ Ottimizza Prompt", "📧 Riscrivi Email"],
-            ["ℹ️ Aiuto", "❌ Stop"],
+            ["ℹ️ Info", "❌ Stop"],
         ],
         resize_keyboard=True,
         one_time_keyboard=False,
@@ -193,27 +210,15 @@ async def handle_button_press(
         await update.message.reply_text(message, reply_markup=get_main_keyboard())
         return WAITING_FOR_EMAIL
 
-    elif user_input == "ℹ️ Aiuto":
-        help_text = (
-            "ℹ️ Guida Rapida\n\n"
-            "Come usare il bot:\n"
-            "1️⃣ Scegli cosa generare:\n"
-            "   • 📝 Recensione prodotto (solo Amazon)\n"
-            "   • 💼 Annuncio di vendita (qualsiasi sito)\n"
-            "   • ✨ Ottimizza Prompt (riscrivi prompts con KERNEL)\n"
-            "2️⃣ Incolla il link o il testo del prompt\n"
-            "3️⃣ Per gli annunci, seleziona la condizione\n"
-            "4️⃣ Aspetta la generazione (1-2 minuti)\n"
-            "5️⃣ Ricevi il tuo testo!\n\n"
-            "Comandi disponibili:\n"
-            "• /start - Menu principale\n"
-            "• /help - Questa guida\n\n"
-            "Supporto:\n"
-            "Se il link non funziona, assicurati che:\n"
-            "• Sia un URL valido\n"
-            "• Inizi con `https://`\n\n"
+    elif user_input == "ℹ️ Info":
+        version = await _get_latest_version()
+        info_text = (
+            f"ℹ️ Personal AI Agent\n\n"
+            f"📌 Versione: {version}\n"
+            f"👤 Creato da: [merendamattia](https://github.com/merendamattia)\n"
+            f"📦 Repository: [personal-ai-agent](https://github.com/merendamattia/personal-ai-agent)\n"
         )
-        await update.message.reply_text(help_text, reply_markup=get_main_keyboard())
+        await update.message.reply_text(info_text, reply_markup=get_main_keyboard(), parse_mode="Markdown")
         return WAITING_FOR_LINK
 
     elif user_input == "❌ Stop":
@@ -572,8 +577,9 @@ async def generate_output(
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send help message"""
+    version = await _get_latest_version()
     help_text = (
-        "ℹ️ AI Agent Bot\n\n"
+        f"ℹ️ AI Agent Bot (v{version})\n\n"
         "Come usare:\n"
         "1️⃣ Scegli cosa generare:\n"
         "   • 📝 Recensione prodotto (solo Amazon)\n"
@@ -590,7 +596,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         "• Usa DataPizza AI Framework\n"
         "• Python Telegram Bot\n\n"
         "Supporto:\n"
-        "Se hai problemi, assicurati che il link sia valido."
+        "Se hai problemi, assicurati che il link sia valido.\n"
+        "🔗 GitHub: https://github.com/merendamattia/amazon-ai-agent"
     )
     await update.message.reply_text(help_text, reply_markup=get_main_keyboard())
 
