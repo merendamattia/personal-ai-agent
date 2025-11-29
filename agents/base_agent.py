@@ -64,12 +64,42 @@ class BaseAmazonAgent(ABC):
 
         logger.info("Agent initialized successfully")
 
-    def _generate(self, link, output_type, **kwargs):
+    def _generate(self, output_type, **kwargs):
+        """
+        Generate output based on the provided parameters
+
+        Args:
+            output_type: Type of output being generated (for logging)
+            **kwargs: Additional parameters to pass to the prompt template
+
+        Returns:
+            dict: Dictionary with keys 'result' (generated text) and 'tokens' (token count)
+        """
+        if not self.agent:
+            raise RuntimeError("Agent not initialized")
+
+        logger.info(f"Generating {output_type}")
+
+        # Format the run prompt with the provided parameters
+        run_prompt = self.run_prompt_template.format(**kwargs)
+
+        # Count tokens in the run prompt
+        token_count = count_tokens(run_prompt)
+        logger.info(f"Run prompt contains {token_count} tokens")
+
+        # Run the agent
+        response = self.agent.run(run_prompt)
+        result = response.text
+
+        logger.info(f"{output_type.capitalize()} generated successfully (tokens: {token_count})")
+        return {"result": result, "tokens": token_count}
+
+    def _generate_with_link(self, link, output_type, **kwargs):
         """
         Generate output for the given product link
 
         Args:
-            link: Product URL or text content (for prompt optimization)
+            link: Product URL or text content
             output_type: Type of output being generated (for logging)
             **kwargs: Additional parameters to pass to the prompt template
 

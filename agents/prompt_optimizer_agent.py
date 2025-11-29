@@ -34,4 +34,4 @@ class PromptOptimizerAgent(BaseAmazonAgent):
         Returns:
             dict: Dictionary with 'result' (optimized prompt) and 'tokens' (token count)
         """
-        return self._generate("dummy_link", "prompt optimization", prompt_text=prompt_text)
+        return self._generate("prompt optimization", prompt_text=prompt_text)
