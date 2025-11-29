@@ -1,9 +1,9 @@
 services:
-  amazon-ai-agent-telegram-bot:
+  personal-ai-agent-telegram-bot:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: amazon-ai-agent-telegram-bot
+    container_name: personal-ai-agent-telegram-bot
     env_file: .env
     restart: unless-stopped
     environment:

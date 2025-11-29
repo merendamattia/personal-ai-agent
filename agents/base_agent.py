@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from tools.web_fetch import create_web_fetch_tool
 from utils.client_utils import get_client
 from utils.prompt_loader import load_prompt
+from utils.token_utils import count_tokens
 from utils.url_utils import expand_short_url
 
 # Load environment variables
@@ -68,21 +69,25 @@ class BaseAmazonAgent(ABC):
         Generate output for the given product link
 
         Args:
-            link: Product URL
+            link: Product URL or text content (for prompt optimization)
             output_type: Type of output being generated (for logging)
             **kwargs: Additional parameters to pass to the prompt template
 
         Returns:
-            str: Generated output text
+            dict: Dictionary with keys 'result' (generated text) and 'tokens' (token count)
         """
         if not self.agent:
             raise RuntimeError("Agent not initialized")
 
-        logger.info(f"Generating {output_type} for: {link}")
+        logger.info(f"Generating {output_type} for: {link[:50] if len(link) > 50 else link}")
 
-        # Expand the URL if it's shortened
-        expanded_link = expand_short_url(link)
-        logger.info(f"Using link: {expanded_link}")
+        # Only expand URL if it's a real link (starts with http)
+        if link.startswith(("http://", "https://")):
+            expanded_link = expand_short_url(link)
+            logger.info(f"Using link: {expanded_link}")
+        else:
+            expanded_link = link
+            logger.info(f"Using content text")
 
         # Build the prompt parameters
         prompt_params = {"link": expanded_link}
@@ -91,12 +96,16 @@ class BaseAmazonAgent(ABC):
         # Format the run prompt with the provided parameters
         run_prompt = self.run_prompt_template.format(**prompt_params)
 
+        # Count tokens in the run prompt
+        token_count = count_tokens(run_prompt)
+        logger.info(f"Run prompt contains {token_count} tokens")
+
         # Run the agent
         response = self.agent.run(run_prompt, tool_choice="required_first")
         result = response.text
 
-        logger.info(f"{output_type.capitalize()} generated successfully")
-        return result
+        logger.info(f"{output_type.capitalize()} generated successfully (tokens: {token_count})")
+        return {"result": result, "tokens": token_count}
 
     @abstractmethod
     def get_system_prompt_filename(self):

@@ -24,6 +24,6 @@ class AmazonReviewerAgent(BaseAmazonAgent):
             link: Amazon product URL
 
         Returns:
-            str: Generated review text
+            dict: Dictionary with 'result' (review text) and 'tokens' (token count)
         """
         return self._generate(link, "review")

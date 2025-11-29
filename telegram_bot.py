@@ -21,6 +21,7 @@ from telegram.ext import (
 
 from agents.amazon_reviewer_agent import AmazonReviewerAgent
 from agents.amazon_sales_listing_agent import AmazonSalesListingAgent
+from agents.prompt_optimizer_agent import PromptOptimizerAgent
 
 # Load environment variables
 load_dotenv()
@@ -32,7 +33,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Conversation states
-WAITING_FOR_LINK, SELECTING_CONDITION, GENERATING_OUTPUT = range(3)
+WAITING_FOR_LINK, SELECTING_CONDITION, GENERATING_OUTPUT, WAITING_FOR_PROMPT = range(4)
 
 # Item condition options for sales listings
 ITEM_CONDITIONS = [
@@ -49,6 +50,7 @@ DEFAULT_ITEM_CONDITION = "Nuovo"
 # Global agent instances
 reviewer_agent = None
 listing_agent = None
+prompt_optimizer_agent = None
 provider = "google"  # Default provider
 
 
@@ -58,7 +60,8 @@ def get_main_keyboard():
     return ReplyKeyboardMarkup(
         [
             ["📝 Genera Recensione", "💼 Genera Annuncio"],
-            ["ℹ️ Aiuto", "❌ Stop"],
+            ["✨ Ottimizza Prompt", "ℹ️ Aiuto"],
+            ["❌ Stop"],
         ],
         resize_keyboard=True,
         one_time_keyboard=False,
@@ -66,8 +69,8 @@ def get_main_keyboard():
 
 
 def _initialize_agent():
-    """Initialize the Amazon Reviewer and Sales Listing Agents"""
-    global reviewer_agent, listing_agent
+    """Initialize the Amazon Reviewer, Sales Listing, and Prompt Optimizer Agents"""
+    global reviewer_agent, listing_agent, prompt_optimizer_agent
     try:
         # Determine which provider and keys to use
         if provider.lower() == "openai":
@@ -88,8 +91,9 @@ def _initialize_agent():
 
         reviewer_agent = AmazonReviewerAgent(api_key, model, provider=provider)
         listing_agent = AmazonSalesListingAgent(api_key, model, provider=provider)
+        prompt_optimizer_agent = PromptOptimizerAgent(api_key, model, provider=provider)
         logger.info(
-            f"Amazon Reviewer and Sales Listing Agents initialized successfully with provider: {provider}"
+            f"All agents initialized successfully with provider: {provider}"
         )
         return True
     except Exception as e:
@@ -148,6 +152,20 @@ async def handle_button_press(
         await update.message.reply_text(message, reply_markup=get_main_keyboard())
         return WAITING_FOR_LINK
 
+    elif user_input == "✨ Ottimizza Prompt":
+        context.user_data["output_type"] = "optimize-prompt"
+        message = (
+            "📝 Per favore, inviami il prompt che desideri ottimizzare\n\n"
+            "💡 Puoi copiare il testo di un prompt e io lo riscritto seguendo i principi KERNEL\n"
+            "• Migliore struttura\n"
+            "• Chiarezza aumentata\n"
+            "• Format standardizzato\n\n"
+            "⏳ L'ottimizzazione potrebbe richiedere un minuto...\n\n"
+            "Usa il pulsante ❌ Stop per annullare in qualsiasi momento."
+        )
+        await update.message.reply_text(message, reply_markup=get_main_keyboard())
+        return WAITING_FOR_PROMPT
+
     elif user_input == "ℹ️ Aiuto":
         help_text = (
             "ℹ️ Guida Rapida\n\n"
@@ -155,7 +173,8 @@ async def handle_button_press(
             "1️⃣ Scegli cosa generare:\n"
             "   • 📝 Recensione prodotto (solo Amazon)\n"
             "   • 💼 Annuncio di vendita (qualsiasi sito)\n"
-            "2️⃣ Incolla il link del prodotto\n"
+            "   • ✨ Ottimizza Prompt (riscrivi prompts con KERNEL)\n"
+            "2️⃣ Incolla il link o il testo del prompt\n"
             "3️⃣ Per gli annunci, seleziona la condizione\n"
             "4️⃣ Aspetta la generazione (1-2 minuti)\n"
             "5️⃣ Ricevi il tuo testo!\n\n"
@@ -245,6 +264,34 @@ async def handle_product_link(
     return await generate_output(update, context, link, output_type)
 
 
+async def handle_prompt_input(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    """Handle prompt text input for optimization"""
+    prompt_text = update.message.text.strip()
+
+    if not prompt_text:
+        await update.message.reply_text(
+            "❌ Il prompt non può essere vuoto\n\n"
+            "Per favore, inviami il testo del prompt che desideri ottimizzare.",
+            reply_markup=get_main_keyboard(),
+        )
+        return WAITING_FOR_PROMPT
+
+    logger.info(f"User {update.effective_user.id} requested prompt optimization")
+
+    # Show loading message
+    loading_msg = (
+        "⏳ Sto ottimizzando il tuo prompt...\n\n"
+        "Questo potrebbe richiedere un minuto... Per favore, aspetta.\n\n"
+        "🔄 Applicando i principi KERNEL..."
+    )
+    await update.message.reply_text(loading_msg, reply_markup=get_main_keyboard())
+
+    # Generate output
+    return await generate_output(update, context, prompt_text, "optimize-prompt")
+
+
 async def handle_condition_selection(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -305,13 +352,13 @@ async def generate_output(
     output_type: str,
     message_obj=None,
 ) -> int:
-    """Generate review or listing output"""
+    """Generate review, listing, or optimized prompt output"""
 
     # Determine which message object to use for replies
     if message_obj is None:
         message_obj = update.message
 
-    # Show loading message for reviews (listings already show it in condition handler)
+    # Show loading message for reviews (listings and prompt optimization already show it)
     if output_type == "review":
         loading_msg = (
             "⏳ Sto generando la tua recensione...\n\n"
@@ -320,11 +367,13 @@ async def generate_output(
         )
         await message_obj.reply_text(loading_msg, reply_markup=get_main_keyboard())
 
-    success_header = (
-        "💼 ANNUNCIO DI VENDITA GENERATO"
-        if output_type == "listing"
-        else "📝 RECENSIONE GENERATA"
-    )
+    # Determine header based on output type
+    if output_type == "listing":
+        success_header = "💼 ANNUNCIO DI VENDITA GENERATO"
+    elif output_type == "optimize-prompt":
+        success_header = "✨ PROMPT OTTIMIZZATO"
+    else:
+        success_header = "📝 RECENSIONE GENERATA"
 
     try:
         # Generate output using the appropriate agent
@@ -341,7 +390,21 @@ async def generate_output(
             item_condition = context.user_data.get(
                 "item_condition", DEFAULT_ITEM_CONDITION
             )
-            result = listing_agent.generate_listing(link, item_condition)
+            output = listing_agent.generate_listing(link, item_condition)
+            result = output["result"]
+            tokens = output["tokens"]
+        elif output_type == "optimize-prompt":
+            if prompt_optimizer_agent is None:
+                await message_obj.reply_text(
+                    "❌ Errore: L'agente non è stato inizializzato.\n\n"
+                    "Usa /start per ricominciare.",
+                    reply_markup=get_main_keyboard(),
+                )
+                return WAITING_FOR_LINK
+
+            output = prompt_optimizer_agent.optimize_prompt(link)
+            result = output["result"]
+            tokens = output["tokens"]
         else:
             if reviewer_agent is None:
                 await message_obj.reply_text(
@@ -351,16 +414,19 @@ async def generate_output(
                 )
                 return WAITING_FOR_LINK
 
-            result = reviewer_agent.generate_review(link)
+            output = reviewer_agent.generate_review(link)
+            result = output["result"]
+            tokens = output["tokens"]
 
-        # Send the result as a single message
+        # Send the result with token count information
+        message_text = f"{success_header}\n\n{result}\n\n📊 Input tokens: {tokens}"
         await message_obj.reply_text(
-            f"{success_header}\n\n{result}",
+            message_text,
             reply_markup=get_main_keyboard(),
         )
 
         logger.info(
-            f"{output_type.capitalize()} generated successfully for user {update.effective_user.id}"
+            f"{output_type.capitalize()} generated successfully for user {update.effective_user.id} (tokens: {tokens})"
         )
 
         # Clear user data after successful generation
@@ -472,6 +538,9 @@ def main() -> None:
         states={
             WAITING_FOR_LINK: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_button_press),
+            ],
+            WAITING_FOR_PROMPT: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_prompt_input),
             ],
             SELECTING_CONDITION: [
                 CallbackQueryHandler(handle_condition_selection, pattern="^condition:"),

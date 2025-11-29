@@ -10,6 +10,21 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 
+def count_tokens(text):
+    """
+    Count the number of tokens in text
+
+    Args:
+        text: Text to count tokens for
+
+    Returns:
+        int: Number of tokens
+    """
+    encoding = tiktoken.get_encoding("cl100k_base")
+    tokens = encoding.encode(text)
+    return len(tokens)
+
+
 def truncate_to_max_tokens(text, max_tokens=None):
     """
     Truncate text to a maximum number of tokens
@@ -35,3 +50,4 @@ def truncate_to_max_tokens(text, max_tokens=None):
         return truncated_text
 
     return text
+

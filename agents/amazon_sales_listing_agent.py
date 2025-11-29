@@ -25,6 +25,6 @@ class AmazonSalesListingAgent(BaseAmazonAgent):
             item_condition: The condition of the item
 
         Returns:
-            str: Generated sales listing text
+            dict: Dictionary with 'result' (listing text) and 'tokens' (token count)
         """
         return self._generate(link, "sales listing", item_condition=item_condition)

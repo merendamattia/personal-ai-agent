@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 from agents.amazon_reviewer_agent import AmazonReviewerAgent
 from agents.amazon_sales_listing_agent import AmazonSalesListingAgent
+from agents.prompt_optimizer_agent import PromptOptimizerAgent
 
 # Configure logger
 logging.basicConfig(
@@ -38,14 +39,14 @@ def _load_environment(provider):
 def _parse_arguments():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(
-        description="Generate an Amazon product review or sales listing using an AI agent"
+        description="Generate an Amazon product review, sales listing, or optimize a prompt using an AI agent"
     )
-    parser.add_argument("link", help="Amazon product link")
+    parser.add_argument("link", nargs="?", help="Amazon product link or prompt text")
     parser.add_argument(
         "--type",
-        choices=["review", "listing"],
+        choices=["review", "listing", "optimize-prompt"],
         default="review",
-        help="Output type: 'review' for product review or 'listing' for sales listing (default: review)",
+        help="Output type: 'review' for product review, 'listing' for sales listing, or 'optimize-prompt' for prompt optimization (default: review)",
     )
     parser.add_argument(
         "--provider",
@@ -59,15 +60,21 @@ def _parse_arguments():
 def main():
     """Main function"""
     try:
-        logger.info("Starting Amazon review/listing generator")
+        logger.info("Starting Amazon review/listing generator or prompt optimizer")
 
         # Parse arguments
         args = _parse_arguments()
         link = args.link
         output_type = args.type
         provider = args.provider
+
+        # Validate that link is provided
+        if not link:
+            logger.error("Link or prompt text is required")
+            raise ValueError("Please provide a link or prompt text")
+
         logger.info(
-            f"Processing link: {link} (type: {output_type}, provider: {provider})"
+            f"Processing: {link[:50]}... (type: {output_type}, provider: {provider})"
         )
 
         # Load environment
@@ -80,18 +87,33 @@ def main():
 
             # Generate sales listing
             logger.info("Generating sales listing...")
-            result = agent.generate_listing(link)
+            output = agent.generate_listing(link)
+            result = output["result"]
+            tokens = output["tokens"]
             logger.info("Sales listing generated successfully")
+        elif output_type == "optimize-prompt":
+            agent = PromptOptimizerAgent(api_key, model, provider=provider)
+            logger.info("Prompt Optimizer Agent initialized")
+
+            # Optimize prompt
+            logger.info("Optimizing prompt...")
+            output = agent.optimize_prompt(link)
+            result = output["result"]
+            tokens = output["tokens"]
+            logger.info("Prompt optimized successfully")
         else:
             agent = AmazonReviewerAgent(api_key, model, provider=provider)
             logger.info("Reviewer Agent initialized")
 
             # Generate review
             logger.info("Generating review...")
-            result = agent.generate_review(link)
+            output = agent.generate_review(link)
+            result = output["result"]
+            tokens = output["tokens"]
             logger.info("Review generated successfully")
 
         print(result)
+        print(f"\n📊 Input tokens: {tokens}")
 
     except FileNotFoundError as e:
         logger.error(f"File not found - {e}")

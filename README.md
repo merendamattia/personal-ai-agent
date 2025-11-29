@@ -1,20 +1,21 @@
-# 📝 Amazon AI Agent
+# 📝 Personal AI Agent
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Latest Release](https://img.shields.io/github/v/release/merendamattia/amazon-ai-agent?label=release)](https://github.com/merendamattia/amazon-ai-agent/releases)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/)
 
-An intelligent AI agent that generates detailed and professional Amazon product reviews and sales listings from product links. Powered by OpenAI and Google AI models with advanced web scraping and content analysis capabilities.
+An intelligent AI agent that generates detailed and professional Amazon product reviews, sales listings, and optimizes prompts using KERNEL principles. Powered by OpenAI and Google AI models with advanced web scraping and content analysis capabilities.
 
 ## ✨ Features
 
 - 🤖 **Multi-Provider Support** - Works with OpenAI (GPT) and Google (Gemini) models
 - 📝 **Product Reviews** - Generate detailed and professional Amazon product reviews
 - 💼 **Sales Listings** - Create persuasive sales listings for platforms like eBay, Subito, or Facebook Marketplace
+- ✨ **Prompt Optimizer** - Rewrite and optimize prompts following KERNEL framework principles
 - 🔗 **Direct Link Processing** - Paste an Amazon product link and get instant output
-- 📱 **Telegram Bot** - Interact with the agent directly through Telegram
+- 📱 **Telegram Bot** - Interact with all agents directly through Telegram
 - 🌐 **Web Content Extraction** - Advanced web fetching with intelligent token management
-- 📊 **Smart Token Management** - Automatic content truncation for optimal performance
+- 📊 **Smart Token Management** - Automatic content truncation for optimal performance with token counting
 - 💬 **Multi-Tool Agent System** - Uses DataPizza framework for powerful agent capabilities
 - 🛡️ **Error Handling** - Robust error handling and logging throughout
 - ⚙️ **Flexible Configuration** - Easy switching between providers and models
@@ -76,7 +77,7 @@ An intelligent AI agent that generates detailed and professional Amazon product 
 
 ### Running the Application
 
-#### CLI - Generate a review or sales listing for an Amazon product:
+#### CLI - Generate a review, sales listing, or optimize a prompt:
 
 ```bash
 # Generate a review using default provider (Google)
@@ -85,16 +86,30 @@ python app.py https://www.amazon.com/your-product-link
 # Generate a sales listing
 python app.py --type listing https://www.amazon.com/your-product-link
 
+# Optimize a prompt following KERNEL principles
+python app.py --type optimize-prompt "Your prompt text here"
+
 # Use OpenAI provider explicitly
 python app.py --provider openai https://www.amazon.com/your-product-link
 
 # Generate listing with OpenAI
 python app.py --type listing --provider openai https://www.amazon.com/your-product-link
+
+# Optimize prompt with OpenAI
+python app.py --type optimize-prompt --provider openai "Your prompt text here"
 ```
+
+**Output Types:**
+- `review` (default) - Generate Amazon product reviews
+- `listing` - Create sales listings for secondary markets
+- `optimize-prompt` - Rewrite prompts using KERNEL structure
 
 **Supported providers:**
 - `google` (default) - Uses Google's Gemini models
 - `openai` - Uses OpenAI's GPT models
+
+**Token Counting:**
+All operations display the number of tokens used in the input prompt for cost estimation and performance monitoring.
 
 #### Telegram Bot - Interactive chat interface:
 Quick start:
@@ -110,12 +125,56 @@ python telegram_bot.py --provider openai
 Then open Telegram, find your bot, and start using it!
 
 **Bot Features:**
-- 📝 Interactive menu to generate reviews or sales listings
-- 🔗 Simply paste Amazon links
-- ⏳ Real-time processing status updates
+- 📝 Interactive menu to generate reviews
+- 💼 Create sales listings with condition selection
+- ✨ Optimize and rewrite prompts using KERNEL principles
+- 🔗 Simply paste Amazon links or prompt text
+- ⏳ Real-time processing status updates with token counting
+- 📊 Input token display for cost monitoring
 - 💬 Support for long outputs (automatically split into multiple messages)
 - ❌ Easy cancel option
-- 💼 Choose between product reviews and sales listings
+- ℹ️ Built-in help guide
+
+## 📚 Understanding the KERNEL Framework
+
+The **Prompt Optimizer Agent** uses the KERNEL framework to improve prompt effectiveness:
+
+- **K**nowledge: Context and background information for the LLM
+- **E**xample: Concrete input/output examples
+- **R**ules: Constraints and requirements
+- **N**uances: Subtle details and edge cases
+- **E**xecution: Clear format and delivery instructions
+- **L**imits: Boundaries and token/length constraints
+
+This structure significantly improves LLM comprehension and output quality.
+
+## 📁 Project Structure
+
+```
+amazon-ai-agent/
+├── agents/                          # AI agent implementations
+│   ├── base_agent.py               # Abstract base class for all agents
+│   ├── amazon_reviewer_agent.py     # Product review generation
+│   ├── amazon_sales_listing_agent.py # Sales listing generation
+│   └── prompt_optimizer_agent.py    # Prompt optimization using KERNEL
+├── tools/                           # Custom tools for agents
+│   └── web_fetch.py                # Web content extraction
+├── utils/                           # Utility functions
+│   ├── client_utils.py             # LLM client factory
+│   ├── prompt_loader.py            # Dynamic prompt loading
+│   ├── token_utils.py              # Token counting and management
+│   └── url_utils.py                # URL expansion and validation
+├── prompts/                         # Markdown-based prompt templates
+│   ├── review_system_prompt.md
+│   ├── review_run_prompt.md
+│   ├── sales_listing_system_prompt.md
+│   ├── sales_listing_run_prompt.md
+│   ├── prompt_optimizer_system_prompt.md
+│   └── prompt_optimizer_run_prompt.md
+├── app.py                           # CLI entry point
+├── telegram_bot.py                  # Telegram bot interface
+└── README.md                        # This file
+```
 
 ### Docker
 
