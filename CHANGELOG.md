@@ -1,3 +1,12 @@
+# [1.7.0](https://github.com/merendamattia/personal-ai-agent/compare/v1.6.0...v1.7.0) (2025-11-29)
+
+
+### Features
+
+* add email rewriting functionality with tone selection ([4941293](https://github.com/merendamattia/personal-ai-agent/commit/494129398646ecef09397535be24ce5723378e12))
+* add version fetching functionality and update info/help commands ([1a214fb](https://github.com/merendamattia/personal-ai-agent/commit/1a214fbe07675c54eb4d8c52de38dc0494282377))
+* enhance functionality with prompt optimization agent and token counting features ([dd6b38b](https://github.com/merendamattia/personal-ai-agent/commit/dd6b38bd9ad74dbf1275c4cf44a116e964b63a27))
+
 # [1.6.0](https://github.com/merendamattia/amazon-ai-agent/compare/v1.5.0...v1.6.0) (2025-11-28)
 
 
