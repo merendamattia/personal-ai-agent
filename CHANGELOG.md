@@ -1,3 +1,15 @@
+# [1.8.0](https://github.com/merendamattia/personal-ai-agent/compare/v1.7.0...v1.8.0) (2025-12-01)
+
+
+### Bug Fixes
+
+* update loading messages to indicate shorter processing times ([4acfe40](https://github.com/merendamattia/personal-ai-agent/commit/4acfe40ad06009f1b68e6ee0843378522a2c0149))
+
+
+### Features
+
+* add Official Report Agent for rewriting reports with technical language ([4621d86](https://github.com/merendamattia/personal-ai-agent/commit/4621d86c1840d3010ce65c1376988c567de3c641))
+
 # [1.7.0](https://github.com/merendamattia/personal-ai-agent/compare/v1.6.0...v1.7.0) (2025-11-29)
 
 
