@@ -177,7 +177,6 @@ async def handle_button_press(
         message = (
             "📎 Per favore, inviami il link del prodotto Amazon\n\n"
             "⏳ La generazione della recensione potrebbe richiedere qualche minuto...\n\n"
-            "Usa il pulsante ❌ Stop per annullare in qualsiasi momento."
         )
         await update.message.reply_text(message, reply_markup=get_main_keyboard())
         return WAITING_FOR_LINK
@@ -188,7 +187,6 @@ async def handle_button_press(
             "📎 Per favore, inviami il link del prodotto\n\n"
             "🌐 Puoi usare link da qualsiasi sito (Amazon, eBay, siti produttori, ecc.)\n\n"
             "⏳ La generazione dell'annuncio potrebbe richiedere qualche minuto...\n\n"
-            "Usa il pulsante ❌ Stop per annullare in qualsiasi momento."
         )
         await update.message.reply_text(message, reply_markup=get_main_keyboard())
         return WAITING_FOR_LINK
@@ -201,8 +199,7 @@ async def handle_button_press(
             "• Migliore struttura\n"
             "• Chiarezza aumentata\n"
             "• Format standardizzato\n\n"
-            "⏳ L'ottimizzazione potrebbe richiedere un minuto...\n\n"
-            "Usa il pulsante ❌ Stop per annullare in qualsiasi momento."
+            "⏳ L'ottimizzazione potrebbe richiedere qualche secondo...\n\n"
         )
         await update.message.reply_text(message, reply_markup=get_main_keyboard())
         return WAITING_FOR_PROMPT
@@ -216,8 +213,7 @@ async def handle_button_press(
             "• Email con errori di grammatica da correggere\n"
             "• Qualsiasi testo che vuoi trasformare in email\n\n"
             "Dopo l'invio, potrai scegliere il tono desiderato (Formale, Amichevole, ecc.)\n\n"
-            "⏳ La riscrittura potrebbe richiedere un minuto...\n\n"
-            "Usa il pulsante ❌ Stop per annullare in qualsiasi momento."
+            "⏳ La riscrittura potrebbe richiedere qualche secondo...\n\n"
         )
         await update.message.reply_text(message, reply_markup=get_main_keyboard())
         return WAITING_FOR_EMAIL
@@ -231,8 +227,7 @@ async def handle_button_press(
             "• Relazioni scritte in modo informale\n"
             "• Qualsiasi documento che necessita di linguaggio tecnico\n\n"
             "Trasformerò il documento in una versione tecnica e professionale.\n\n"
-            "⏳ La riscrittura potrebbe richiedere un minuto...\n\n"
-            "Usa il pulsante ❌ Stop per annullare in qualsiasi momento."
+            "⏳ La riscrittura potrebbe richiedere qualche secondo...\n\n"
         )
         await update.message.reply_text(message, reply_markup=get_main_keyboard())
         return WAITING_FOR_REPORT
@@ -344,7 +339,7 @@ async def handle_prompt_input(
     # Show loading message
     loading_msg = (
         "⏳ Sto ottimizzando il tuo prompt...\n\n"
-        "Questo potrebbe richiedere un minuto... Per favore, aspetta.\n\n"
+        "Questo potrebbe richiedere qualche secondo... Per favore, aspetta.\n\n"
         "🔄 Applicando i principi KERNEL..."
     )
     await update.message.reply_text(loading_msg, reply_markup=get_main_keyboard())
@@ -420,7 +415,7 @@ async def handle_email_tone_selection(
     # Show loading message
     loading_msg = (
         "⏳ Sto riscrivendo la tua email...\n\n"
-        "Questo potrebbe richiedere un minuto... Per favore, aspetta.\n\n"
+        "Questo potrebbe richiedere qualche secondo... Per favore, aspetta.\n\n"
         "🔄 Applicando il tono desiderato..."
     )
     await query.edit_message_text(loading_msg)
@@ -455,7 +450,7 @@ async def handle_report_input(
     # Show loading message
     loading_msg = (
         "⏳ Sto riscrivendo il tuo verbale...\n\n"
-        "Questo potrebbe richiedere un minuto... Per favore, aspetta.\n\n"
+        "Questo potrebbe richiedere qualche secondo... Per favore, aspetta.\n\n"
         "🔄 Applicando il linguaggio tecnico..."
     )
     await update.message.reply_text(loading_msg, reply_markup=get_main_keyboard())
