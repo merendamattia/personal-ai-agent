@@ -13,6 +13,7 @@ An intelligent AI agent that generates detailed and professional Amazon product 
 - 💼 **Sales Listings** - Create persuasive sales listings for platforms like eBay, Subito, or Facebook Marketplace
 - ✨ **Prompt Optimizer** - Rewrite and optimize prompts following KERNEL framework principles
 - 📧 **Email Rewriter** - Rewrite emails with different tones (formal, friendly, diplomatic, assertive, empathetic)
+- 📋 **Official Report Rewriter** - Transform informal reports into professional technical documents
 - 🔗 **Direct Link Processing** - Paste an Amazon product link and get instant output
 - 📱 **Telegram Bot** - Interact with all agents directly through Telegram
 - 🌐 **Web Content Extraction** - Advanced web fetching with intelligent token management
@@ -111,6 +112,7 @@ python app.py --type rewrite-email --provider openai "Your email text here"
 - `listing` - Create sales listings for secondary markets
 - `optimize-prompt` - Rewrite prompts using KERNEL structure
 - `rewrite-email` - Rewrite emails with different tones
+- `rewrite-report` - Rewrite official reports with technical language
 
 **Supported providers:**
 - `google` (default) - Uses Google's Gemini models
