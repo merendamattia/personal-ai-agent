@@ -336,14 +336,6 @@ async def handle_prompt_input(
 
     logger.info(f"User {update.effective_user.id} requested prompt optimization")
 
-    # Show loading message
-    loading_msg = (
-        "⏳ Sto ottimizzando il tuo prompt...\n\n"
-        "Questo potrebbe richiedere qualche secondo... Per favore, aspetta.\n\n"
-        "🔄 Applicando i principi KERNEL..."
-    )
-    await update.message.reply_text(loading_msg, reply_markup=get_main_keyboard())
-
     # Generate output
     return await generate_output(update, context, prompt_text, "optimize-prompt")
 
@@ -446,14 +438,6 @@ async def handle_report_input(
         return WAITING_FOR_REPORT
 
     logger.info(f"User {update.effective_user.id} requested report rewriting")
-
-    # Show loading message
-    loading_msg = (
-        "⏳ Sto riscrivendo il tuo verbale...\n\n"
-        "Questo potrebbe richiedere qualche secondo... Per favore, aspetta.\n\n"
-        "🔄 Applicando il linguaggio tecnico..."
-    )
-    await update.message.reply_text(loading_msg, reply_markup=get_main_keyboard())
 
     # Generate output
     return await generate_output(update, context, report_text, "rewrite-report")
