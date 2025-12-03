@@ -83,18 +83,24 @@ class BaseAmazonAgent(ABC):
         # Format the run prompt with the provided parameters
         run_prompt = self.run_prompt_template.format(**kwargs)
 
-        # Count tokens in the run prompt
-        token_count = count_tokens(run_prompt)
-        logger.info(f"Run prompt contains {token_count} tokens")
+        # Count tokens in both system prompt and run prompt
+        system_prompt = load_prompt(self.get_system_prompt_filename())
+        system_token_count = count_tokens(system_prompt)
+        run_token_count = count_tokens(run_prompt)
+        total_token_count = system_token_count + run_token_count
+
+        logger.info(f"System prompt contains {system_token_count} tokens")
+        logger.info(f"Run prompt contains {run_token_count} tokens")
+        logger.info(f"Total input tokens: {total_token_count}")
 
         # Run the agent
         response = self.agent.run(run_prompt)
         result = response.text
 
         logger.info(
-            f"{output_type.capitalize()} generated successfully (tokens: {token_count})"
+            f"{output_type.capitalize()} generated successfully (tokens: {total_token_count})"
         )
-        return {"result": result, "tokens": token_count}
+        return {"result": result, "tokens": total_token_count}
 
     def _generate_with_link(self, link, output_type, **kwargs):
         """
@@ -130,18 +136,24 @@ class BaseAmazonAgent(ABC):
         # Format the run prompt with the provided parameters
         run_prompt = self.run_prompt_template.format(**prompt_params)
 
-        # Count tokens in the run prompt
-        token_count = count_tokens(run_prompt)
-        logger.info(f"Run prompt contains {token_count} tokens")
+        # Count tokens in both system prompt and run prompt
+        system_prompt = load_prompt(self.get_system_prompt_filename())
+        system_token_count = count_tokens(system_prompt)
+        run_token_count = count_tokens(run_prompt)
+        total_token_count = system_token_count + run_token_count
+
+        logger.info(f"System prompt contains {system_token_count} tokens")
+        logger.info(f"Run prompt contains {run_token_count} tokens")
+        logger.info(f"Total input tokens: {total_token_count}")
 
         # Run the agent
         response = self.agent.run(run_prompt, tool_choice="required_first")
         result = response.text
 
         logger.info(
-            f"{output_type.capitalize()} generated successfully (tokens: {token_count})"
+            f"{output_type.capitalize()} generated successfully (tokens: {total_token_count})"
         )
-        return {"result": result, "tokens": token_count}
+        return {"result": result, "tokens": total_token_count}
 
     @abstractmethod
     def get_system_prompt_filename(self):
