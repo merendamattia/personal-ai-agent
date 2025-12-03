@@ -1,3 +1,11 @@
+## [1.8.1](https://github.com/merendamattia/personal-ai-agent/compare/v1.8.0...v1.8.1) (2025-12-03)
+
+
+### Bug Fixes
+
+* enhance token counting to include system prompt and total input tokens ([191609e](https://github.com/merendamattia/personal-ai-agent/commit/191609e59eb2ab55884b0d4b4c74d0630a50fb60))
+* remove loading messages from prompt optimization and report rewriting ([b1d13b1](https://github.com/merendamattia/personal-ai-agent/commit/b1d13b1761b993038b0bdf46a7cba3d9d402fe35))
+
 # [1.8.0](https://github.com/merendamattia/personal-ai-agent/compare/v1.7.0...v1.8.0) (2025-12-01)
 
 
