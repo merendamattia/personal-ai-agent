@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/merendamattia/personal-ai-agent/compare/v1.8.1...v1.8.2) (2025-12-22)
+
+
+### Bug Fixes
+
+* update review prompts to enhance clarity and detail requirements ([3d0bd84](https://github.com/merendamattia/personal-ai-agent/commit/3d0bd841acb48972e0fdb5d352bbc8891b937b02))
+
 ## [1.8.1](https://github.com/merendamattia/personal-ai-agent/compare/v1.8.0...v1.8.1) (2025-12-03)
 
 
